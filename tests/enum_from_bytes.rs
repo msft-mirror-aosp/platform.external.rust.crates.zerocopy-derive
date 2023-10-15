@@ -4,12 +4,7 @@
 
 #![allow(warnings)]
 
-mod util;
-
-use {
-    static_assertions::assert_impl_all,
-    zerocopy::{FromBytes, FromZeroes},
-};
+use zerocopy::FromBytes;
 
 // An enum is `FromBytes` if:
 // - `repr(uN)` or `repr(iN)`
@@ -28,7 +23,18 @@ use {
 // `Variant128` has a discriminant of -128) since Rust won't automatically wrap
 // a signed discriminant around without you explicitly telling it to.
 
-#[derive(FromZeroes, FromBytes)]
+struct IsFromBytes<T: FromBytes>(T);
+
+// Fail compilation if `$ty: !FromBytes`.
+macro_rules! is_from_bytes {
+    ($ty:ty) => {
+        const _: () = {
+            let _: IsFromBytes<$ty>;
+        };
+    };
+}
+
+#[derive(FromBytes)]
 #[repr(u8)]
 enum FooU8 {
     Variant0,
@@ -289,9 +295,9 @@ enum FooU8 {
     Variant255,
 }
 
-assert_impl_all!(FooU8: FromBytes);
+is_from_bytes!(FooU8);
 
-#[derive(FromZeroes, FromBytes)]
+#[derive(FromBytes)]
 #[repr(i8)]
 enum FooI8 {
     Variant0,
@@ -552,9 +558,9 @@ enum FooI8 {
     Variant255,
 }
 
-assert_impl_all!(FooI8: FromBytes);
+is_from_bytes!(FooI8);
 
-#[derive(FromZeroes, FromBytes)]
+#[derive(FromBytes)]
 #[repr(u8, align(2))]
 enum FooU8Align {
     Variant0,
@@ -815,9 +821,9 @@ enum FooU8Align {
     Variant255,
 }
 
-assert_impl_all!(FooU8Align: FromBytes);
+is_from_bytes!(FooU8Align);
 
-#[derive(FromZeroes, FromBytes)]
+#[derive(FromBytes)]
 #[repr(i8, align(2))]
 enum FooI8Align {
     Variant0,
@@ -1078,9 +1084,9 @@ enum FooI8Align {
     Variant255,
 }
 
-assert_impl_all!(FooI8Align: FromBytes);
+is_from_bytes!(FooI8Align);
 
-#[derive(FromZeroes, FromBytes)]
+#[derive(FromBytes)]
 #[repr(u16)]
 enum FooU16 {
     Variant0,
@@ -66621,9 +66627,9 @@ enum FooU16 {
     Variant65535,
 }
 
-assert_impl_all!(FooU16: FromBytes);
+is_from_bytes!(FooU16);
 
-#[derive(FromZeroes, FromBytes)]
+#[derive(FromBytes)]
 #[repr(i16)]
 enum FooI16 {
     Variant0,
@@ -132164,4 +132170,4 @@ enum FooI16 {
     Variant65535,
 }
 
-assert_impl_all!(FooI16: FromBytes);
+is_from_bytes!(FooI16);

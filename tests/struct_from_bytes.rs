@@ -4,57 +4,52 @@
 
 #![allow(warnings)]
 
-mod util;
-
 use std::{marker::PhantomData, option::IntoIter};
 
-use {
-    static_assertions::assert_impl_all,
-    zerocopy::{FromBytes, FromZeroes},
-};
+use zerocopy::FromBytes;
 
-use crate::util::AU16;
+struct IsFromBytes<T: FromBytes>(T);
+
+// Fail compilation if `$ty: !FromBytes`.
+macro_rules! is_from_bytes {
+    ($ty:ty) => {
+        const _: () = {
+            let _: IsFromBytes<$ty>;
+        };
+    };
+}
 
 // A struct is `FromBytes` if:
 // - all fields are `FromBytes`
 
-#[derive(FromZeroes, FromBytes)]
+#[derive(FromBytes)]
 struct Zst;
 
-assert_impl_all!(Zst: FromBytes);
+is_from_bytes!(Zst);
 
-#[derive(FromZeroes, FromBytes)]
+#[derive(FromBytes)]
 struct One {
     a: u8,
 }
 
-assert_impl_all!(One: FromBytes);
+is_from_bytes!(One);
 
-#[derive(FromZeroes, FromBytes)]
+#[derive(FromBytes)]
 struct Two {
     a: u8,
     b: Zst,
 }
 
-assert_impl_all!(Two: FromBytes);
+is_from_bytes!(Two);
 
-#[derive(FromZeroes, FromBytes)]
-struct Unsized {
-    a: [u8],
+#[derive(FromBytes)]
+struct TypeParams<'a, T, I: Iterator> {
+    a: T,
+    c: I::Item,
+    d: u8,
+    e: PhantomData<&'a [u8]>,
+    f: PhantomData<&'static str>,
+    g: PhantomData<String>,
 }
 
-assert_impl_all!(Unsized: FromBytes);
-
-#[derive(FromZeroes, FromBytes)]
-struct TypeParams<'a, T: ?Sized, I: Iterator> {
-    a: I::Item,
-    b: u8,
-    c: PhantomData<&'a [u8]>,
-    d: PhantomData<&'static str>,
-    e: PhantomData<String>,
-    f: T,
-}
-
-assert_impl_all!(TypeParams<'static, (), IntoIter<()>>: FromBytes);
-assert_impl_all!(TypeParams<'static, AU16, IntoIter<()>>: FromBytes);
-assert_impl_all!(TypeParams<'static, [AU16], IntoIter<()>>: FromBytes);
+is_from_bytes!(TypeParams<'static, (), IntoIter<()>>);

@@ -11,97 +11,76 @@ fn main() {}
 // Generic errors
 //
 
-#[derive(FromZeroes, FromBytes)]
+#[derive(FromBytes)]
 #[repr("foo")]
 enum Generic1 {
     A,
 }
 
-#[derive(FromZeroes, FromBytes)]
+#[derive(FromBytes)]
 #[repr(foo)]
 enum Generic2 {
     A,
 }
 
-#[derive(FromZeroes, FromBytes)]
+#[derive(FromBytes)]
 #[repr(transparent)]
 enum Generic3 {
     A,
 }
 
-#[derive(FromZeroes, FromBytes)]
+#[derive(FromBytes)]
 #[repr(u8, u16)]
 enum Generic4 {
     A,
 }
 
-#[derive(FromZeroes, FromBytes)]
+#[derive(FromBytes)]
 enum Generic5 {
     A,
-}
-
-//
-// FromZeroes errors
-//
-
-#[derive(FromZeroes)]
-enum FromZeroes1 {
-    A(u8),
-}
-
-#[derive(FromZeroes)]
-enum FromZeroes2 {
-    A,
-    B(u8),
-}
-
-#[derive(FromZeroes)]
-enum FromZeroes3 {
-    A = 1,
-    B,
 }
 
 //
 // FromBytes errors
 //
 
-#[derive(FromZeroes, FromBytes)]
+#[derive(FromBytes)]
 #[repr(C)]
 enum FromBytes1 {
     A,
 }
 
-#[derive(FromZeroes, FromBytes)]
+#[derive(FromBytes)]
 #[repr(usize)]
 enum FromBytes2 {
     A,
 }
 
-#[derive(FromZeroes, FromBytes)]
+#[derive(FromBytes)]
 #[repr(isize)]
 enum FromBytes3 {
     A,
 }
 
-#[derive(FromZeroes, FromBytes)]
+#[derive(FromBytes)]
 #[repr(u32)]
 enum FromBytes4 {
     A,
 }
 
-#[derive(FromZeroes, FromBytes)]
+#[derive(FromBytes)]
 #[repr(i32)]
 enum FromBytes5 {
     A,
 }
 
-#[derive(FromZeroes, FromBytes)]
+#[derive(FromBytes)]
 #[repr(u64)]
 enum FromBytes6 {
     A,
 }
 
-#[derive(FromZeroes, FromBytes)]
+#[derive(FromBytes)]
 #[repr(i64)]
 enum FromBytes7 {
     A,

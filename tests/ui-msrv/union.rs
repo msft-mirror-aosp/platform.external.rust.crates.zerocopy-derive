@@ -5,10 +5,6 @@
 #[macro_use]
 extern crate zerocopy;
 
-#[path = "../util.rs"]
-mod util;
-
-use self::util::AU16;
 use std::mem::ManuallyDrop;
 
 fn main() {}
@@ -25,7 +21,7 @@ union AsBytes1<T> {
 
 #[derive(AsBytes)]
 #[repr(C)]
-union AsBytes2 {
+union AsBytes {
     foo: u8,
     bar: [u8; 2],
 }
@@ -38,7 +34,7 @@ union AsBytes2 {
 #[repr(C, align(2))]
 union Unaligned1 {
     foo: i16,
-    bar: AU16,
+    bar: u16,
 }
 
 // Transparent unions are unstable; see issue #60405

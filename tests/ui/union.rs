@@ -5,10 +5,7 @@
 #[macro_use]
 extern crate zerocopy;
 
-#[path = "../util.rs"]
-mod util;
-
-use self::util::AU16;
+use std::mem::ManuallyDrop;
 
 fn main() {}
 
@@ -18,13 +15,15 @@ fn main() {}
 
 #[derive(AsBytes)]
 #[repr(C)]
-struct AsBytes1<T>(T);
+union AsBytes1<T> {
+    foo: ManuallyDrop<T>,
+}
 
 #[derive(AsBytes)]
 #[repr(C)]
-struct AsBytes2 {
+union AsBytes {
     foo: u8,
-    bar: AU16,
+    bar: [u8; 2],
 }
 
 //
@@ -33,22 +32,34 @@ struct AsBytes2 {
 
 #[derive(Unaligned)]
 #[repr(C, align(2))]
-struct Unaligned1;
+union Unaligned1 {
+    foo: i16,
+    bar: u16,
+}
+
+// Transparent unions are unstable; see issue #60405
+// <https://github.com/rust-lang/rust/issues/60405> for more information.
+
+// #[derive(Unaligned)]
+// #[repr(transparent, align(2))]
+// union Unaligned2 {
+//     foo: u8,
+// }
 
 #[derive(Unaligned)]
-#[repr(transparent, align(2))]
-struct Unaligned2 {
+#[repr(packed, align(2))]
+union Unaligned3 {
     foo: u8,
 }
 
 #[derive(Unaligned)]
-#[repr(packed, align(2))]
-struct Unaligned3;
-
-#[derive(Unaligned)]
 #[repr(align(1), align(2))]
-struct Unaligned4;
+struct Unaligned4 {
+    foo: u8,
+}
 
 #[derive(Unaligned)]
 #[repr(align(2), align(4))]
-struct Unaligned5;
+struct Unaligned5 {
+    foo: u8,
+}

@@ -6,7 +6,18 @@
 
 use std::{marker::PhantomData, option::IntoIter};
 
-use {static_assertions::assert_impl_all, zerocopy::Unaligned};
+use zerocopy::Unaligned;
+
+struct IsUnaligned<T: Unaligned>(T);
+
+// Fail compilation if `$ty: !Unaligned`.
+macro_rules! is_unaligned {
+    ($ty:ty) => {
+        const _: () = {
+            let _: IsUnaligned<$ty>;
+        };
+    };
+}
 
 // A union is `Unaligned` if:
 // - `repr(align)` is no more than 1 and either
@@ -20,7 +31,7 @@ union Foo {
     a: u8,
 }
 
-assert_impl_all!(Foo: Unaligned);
+is_unaligned!(Foo);
 
 // Transparent unions are unstable; see issue #60405
 // <https://github.com/rust-lang/rust/issues/60405> for more information.
@@ -36,17 +47,10 @@ assert_impl_all!(Foo: Unaligned);
 #[derive(Unaligned)]
 #[repr(packed)]
 union Baz {
-    // NOTE: The `u16` type is not guaranteed to have alignment 2, although it
-    // does on many platforms. However, to fix this would require a custom type
-    // with a `#[repr(align(2))]` attribute, and `#[repr(packed)]` types are not
-    // allowed to transitively contain `#[repr(align(...))]` types. Thus, we
-    // have no choice but to use `u16` here. Luckily, these tests run in CI on
-    // platforms on which `u16` has alignment 2, so this isn't that big of a
-    // deal.
     a: u16,
 }
 
-assert_impl_all!(Baz: Unaligned);
+is_unaligned!(Baz);
 
 #[derive(Unaligned)]
 #[repr(C, align(1))]
@@ -54,7 +58,7 @@ union FooAlign {
     a: u8,
 }
 
-assert_impl_all!(FooAlign: Unaligned);
+is_unaligned!(FooAlign);
 
 #[derive(Unaligned)]
 #[repr(C)]
@@ -70,4 +74,4 @@ where
     g: PhantomData<String>,
 }
 
-assert_impl_all!(TypeParams<'static, (), IntoIter<()>>: Unaligned);
+is_unaligned!(TypeParams<'static, (), IntoIter<()>>);

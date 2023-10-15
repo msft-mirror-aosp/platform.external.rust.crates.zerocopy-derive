@@ -6,7 +6,18 @@
 
 use std::{marker::PhantomData, option::IntoIter};
 
-use {static_assertions::assert_impl_all, zerocopy::AsBytes};
+use zerocopy::AsBytes;
+
+struct IsAsBytes<T: AsBytes>(T);
+
+// Fail compilation if `$ty: !AsBytes`.
+macro_rules! is_as_bytes {
+    ($ty:ty) => {
+        const _: () = {
+            let _: IsAsBytes<$ty>;
+        };
+    };
+}
 
 // A union is `AsBytes` if:
 // - all fields are `AsBytes`
@@ -20,7 +31,7 @@ union CZst {
     a: (),
 }
 
-assert_impl_all!(CZst: AsBytes);
+is_as_bytes!(CZst);
 
 #[derive(AsBytes)]
 #[repr(C)]
@@ -29,7 +40,7 @@ union C {
     b: u8,
 }
 
-assert_impl_all!(C: AsBytes);
+is_as_bytes!(C);
 
 // Transparent unions are unstable; see issue #60405
 // <https://github.com/rust-lang/rust/issues/60405> for more information.
@@ -49,7 +60,7 @@ union CZstPacked {
     a: (),
 }
 
-assert_impl_all!(CZstPacked: AsBytes);
+is_as_bytes!(CZstPacked);
 
 #[derive(AsBytes)]
 #[repr(C, packed)]
@@ -58,7 +69,7 @@ union CPacked {
     b: i8,
 }
 
-assert_impl_all!(CPacked: AsBytes);
+is_as_bytes!(CPacked);
 
 #[derive(AsBytes)]
 #[repr(C, packed)]
@@ -68,4 +79,4 @@ union CMultibytePacked {
     c: f32,
 }
 
-assert_impl_all!(CMultibytePacked: AsBytes);
+is_as_bytes!(CMultibytePacked);

@@ -4,21 +4,19 @@
 
 #![allow(warnings)]
 
-use zerocopy::{AsBytes, FromBytes, FromZeroes, Unaligned};
+use zerocopy::FromBytes;
 
 // Ensure that types that are use'd and types that are referenced by path work.
 
 mod foo {
-    use zerocopy::{AsBytes, FromBytes, FromZeroes, Unaligned};
+    use zerocopy::FromBytes;
 
-    #[derive(FromZeroes, FromBytes, AsBytes, Unaligned)]
-    #[repr(C)]
+    #[derive(FromBytes)]
     pub struct Foo {
         foo: u8,
     }
 
-    #[derive(FromZeroes, FromBytes, AsBytes, Unaligned)]
-    #[repr(C)]
+    #[derive(FromBytes)]
     pub struct Bar {
         bar: u8,
     }
@@ -26,8 +24,7 @@ mod foo {
 
 use foo::Foo;
 
-#[derive(FromZeroes, FromBytes, AsBytes, Unaligned)]
-#[repr(C)]
+#[derive(FromBytes)]
 struct Baz {
     foo: Foo,
     bar: foo::Bar,
