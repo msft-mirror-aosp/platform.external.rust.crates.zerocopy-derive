@@ -9,11 +9,18 @@
 
 extern crate zerocopy as _zerocopy;
 
+#[macro_use]
+mod util;
+
 use std::{marker::PhantomData, option::IntoIter};
 
-use _zerocopy::FromBytes;
+use {
+    _zerocopy::{FromBytes, FromZeroes, Unaligned},
+    static_assertions::assert_impl_all,
+};
 
-#[derive(FromBytes)]
+#[derive(FromZeroes, FromBytes, Unaligned)]
+#[repr(C)]
 struct TypeParams<'a, T, I: Iterator> {
     a: T,
     c: I::Item,
@@ -23,8 +30,4 @@ struct TypeParams<'a, T, I: Iterator> {
     g: PhantomData<String>,
 }
 
-const _FOO: () = {
-    let _: IsFromBytes<TypeParams<'static, (), IntoIter<()>>>;
-};
-
-struct IsFromBytes<T: FromBytes>(PhantomData<T>);
+assert_impl_all!(TypeParams<'static, (), IntoIter<()>>: FromZeroes, FromBytes, Unaligned);
